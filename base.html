@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RSS Feed Example</title>
+  <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+</head>
+<body class="w-100 h-100 sans-serif">
+  <div class="pageTitle shadow-1 w-100 pa3 v-mid z-1">
+      <h1>Our Recognitions</h3>
+  </div>
+  <main class="z-0 relative pv3 ph3">
+    <div id="app" class="flex flex-wrap">
+      <!-- No need for the <div id="feedList"></div> -->
+    </div>
+  </main>
+</body>
+<script>
+  const feedUrl = 'https://blackhawk.achievers.com/api/v1/program/news_feed/get?module=26786&access_key_id=kdwo4YlwygXWvCTTsVKTJwyemzPwUPRB&secret_access_key=nQolwLoSCO4twRJ9oPOLQNmh57o8hI0T';
+
+  function fetchRSSFeed(url) {
+    return fetch(url)
+      .then(response => response.text())
+      .then(data => (new window.DOMParser()).parseFromString(data, 'text/xml'))
+      .catch(error => console.error('Error fetching RSS feed:', error));
+  }
+
+  function getCDATAContent(element) {
+    if (element.firstChild && element.firstChild.nodeType === Node.CDATA_SECTION_NODE) {
+      return element.firstChild.textContent;
+    } else {
+      return element.textContent;
+    }
+  }
+  
+  function splitTitle(title) {
+    // Use regular expression to extract [recipient] and [criteria]
+    const regex = /\[(.*?)\] - Recognized for \[(.*?)\]/;
+    const match = title.match(regex);
+    if (match && match.length === 3) {
+      return {
+        recipient: match[1],
+        criteria: match[2],
+        singleTitleString: null,
+      };
+    } else {
+      return {
+        recipient: null,
+        criteria: null,
+        singleTitleString: title,
+      };
+    }
+  }
+
+  function displayFeedItems(xml) {
+    const items = xml.querySelectorAll('item');
+    const appContainer = document.getElementById('app');
+
+    items.forEach(item => {
+      const title = getCDATAContent(item.querySelector('title'));
+      const link = item.querySelector('link').textContent;
+      const description = getCDATAContent(item.querySelector('description'));
+      const author = getCDATAContent(item.querySelector('author'));
+      const enclosure = item.querySelector('enclosure');
+      const imageURL = enclosure ? enclosure.getAttribute('url') : '';
+
+      // Split title into [recipient], [criteria], and singleTitleString
+      const { recipient, criteria, singleTitleString } = splitTitle(title);
+
+      let titleToShow = recipient ? recipient : singleTitleString;
+
+      const listItem = document.createElement('div');
+      listItem.classList.add("card");
+      listItem.classList.add("w-20");
+      listItem.innerHTML = `
+        <div class="w-100 pa3 v-mid z-1">
+          <div class="w-100 shadow-1 ba b--black-10 br2 mb3 animated bg-white">
+            <div class="ph4 bb br2 br--top b--black-10">
+              <h3 class="mv0 pv3">${titleToShow}</h3>
+            </div>
+            ${imageURL ? `<img src="${imageURL}" alt="Image"/>` : ''}
+            <div class="ph4 pv2">
+              ${criteria ? `<h3 class="mv0 pv3">${criteria}</h3>` : ''}
+              <p class="lh-copy mt2">${description}</p>
+              <p class="lh-copy black-60"> - <span>${author}</span></p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      appContainer.appendChild(listItem);
+    });
+  }
+
+
+  function refreshPage() {
+    window.location.reload();
+  }
+
+  fetchRSSFeed(feedUrl).then(xml => displayFeedItems(xml));
+
+  // Refresh the page every 3 minutes (180,000 milliseconds)
+  setTimeout(refreshPage, 180000);
+</script>
+<style>
+.pageTitle {
+  background-color: #80CC00;
+  color: white;
+}
+main {
+  background-color: #1C355E;
+}
+
+</style>
+</html>
