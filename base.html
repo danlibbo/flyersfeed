@@ -16,9 +16,9 @@
 </body>
 <script>
   // Original Flyers feed
-  // const feedUrl = 'https://blackhawk.achievers.com/api/v1/program/news_feed/get?module=26786&access_key_id=kdwo4YlwygXWvCTTsVKTJwyemzPwUPRB&secret_access_key=nQolwLoSCO4twRJ9oPOLQNmh57o8hI0T';
+  const feedUrl = 'https://blackhawk.achievers.com/api/v1/program/news_feed/get?module=26786&access_key_id=kdwo4YlwygXWvCTTsVKTJwyemzPwUPRB&secret_access_key=nQolwLoSCO4twRJ9oPOLQNmh57o8hI0T';
   // Combined feed
-  const feedUrl = 'https://zapier.com/engine/rss/589633/officefeed';
+  // const feedUrl = 'https://zapier.com/engine/rss/589633/officefeed';
 
   function fetchRSSFeed(url) {
     return fetch(url)
@@ -28,11 +28,14 @@
   }
 
   function getCDATAContent(element) {
-    if (element.firstChild && element.firstChild.nodeType === Node.CDATA_SECTION_NODE) {
+  if (element && element.firstChild) {
+    if (element.firstChild.nodeType === Node.CDATA_SECTION_NODE) {
       return element.firstChild.textContent;
     } else {
       return element.textContent;
     }
+  }
+  return '';
   }
   
   function splitTitle(title) {
@@ -73,21 +76,16 @@
 
       const listItem = document.createElement('div');
       listItem.classList.add("card");
-      listItem.classList.add("w-20");
       listItem.style.display = "inline-block"; // Use inline-block instead of flexbox
       listItem.innerHTML = `
-        <div class="w-100 pa3 v-mid z-1">
-          <div class="w-100 shadow-1 ba b--black-10 br2 mb3 animated bg-white">
-            <div class="ph4 bb br2 br--top b--black-10">
-              <h3 class="mv0 pv3">${titleToShow}</h3>
-            </div>
-            ${imageURL ? `<img src="${imageURL}" alt="Image"/>` : ''}
-            <div class="ph4 pv2">
-              ${criteria ? `<h3 class="mv0 pv3">${criteria}</h3>` : ''}
-              <p class="lh-copy mt2">${description}</p>
-              <p class="lh-copy black-60"> - <span>${author}</span></p>
-            </div>
+        <div class="card-content">
+          <h3 class="card-title">${titleToShow}</h3>
+          <div class="card-image-container">
+            ${imageURL ? `<img class="card-image" src="${imageURL}" alt="Image"/>` : ''}
           </div>
+          ${criteria ? `<h3 class="card-title">${criteria}</h3>` : ''}
+          <p class="card-description">${description}</p>
+          <p class="card-author">- <span>${author}</span></p>
         </div>
       `;
 
@@ -106,19 +104,51 @@
   setTimeout(refreshPage, 180000);
 </script>
 <style>
-.pageTitle {
-  background-color: #80CC00;
-  color: white;
-}
-main {
-  background-color: #1C355E;
-}
-
-/* Additional style for the inline-block cards */
-.card {
-  margin-right: 10px;
-  vertical-align: top;
-  box-sizing: border-box;
-}
+  .pageTitle {
+    background-color: #80CC00;
+    color: white;
+  }
+  main {
+    background-color: #1C355E;
+  }
+  /* Additional style for the inline-block cards */
+  .card {
+    display: inline-block;
+    margin: 1em;
+    vertical-align: top;
+    box-sizing: border-box;
+    width: 18%;
+    text-align: left;
+  }
+  .card-content {
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 1em;
+    border-radius: 1em;
+  }
+  .card-title {
+    font-size: 18px;
+    margin: 0 0 10px;
+    padding: 0;
+    line-height: 1.2;
+  }
+  .card-image-container {
+    text-align: center;
+  }
+  .card-image {
+    max-width: 100%;
+    height: auto;
+  }
+  .card-description {
+    font-size: 14px;
+    margin: 10px 0;
+  }
+  .card-author {
+    font-size: 12px;
+    color: #666;
+  }
+  #app {
+    text-align: center;
+  }
 </style>
 </html>
