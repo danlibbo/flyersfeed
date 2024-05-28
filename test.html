@@ -3,6 +3,7 @@
 <head>
   <title>Flyers Recognition Feed</title>
   <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+  <link rel="stylesheet" href="https://flyersfeed.netlify.app/style.css">
 </head>
 <body class="w-100 h-100 sans-serif">
   <div class="pageTitle shadow-1 w-100 pa3 v-mid z-1">
@@ -53,6 +54,13 @@
     }
   }
 
+  function loadGif(url) {
+    return fetch(url)
+      .then(response => response.blob())
+      .then(blob => URL.createObjectURL(blob))
+      .catch(error => console.error('Error:', error));
+  }
+
   function displayFeedItems(xml) {
     const items = xml.querySelectorAll('item');
     const appContainer = document.getElementById('app');
@@ -73,19 +81,32 @@
       listItem.classList.add("card");
       listItem.style.display = "inline-block";
 
-      listItem.innerHTML = `
-        <div class="card-content">
-          <h3 class="card-title">${titleToShow}</h3>
-          <div class="card-image-container">
-            ${imageURL ? `<img class="card-image" src="${imageURL}" alt="Image" onerror="this.onerror=null; this.src='${imageURL}'"/>` : ''}
+      if (imageURL) {
+        loadGif(imageURL).then(blobURL => {
+          listItem.innerHTML = `
+            <div class="card-content">
+              <h3 class="card-title">${titleToShow}</h3>
+              <div class="card-image-container">
+                <img class="card-image" src="${blobURL}" alt="Image"/>
+              </div>
+              ${criteria ? `<h3 class="card-title">${criteria}</h3>` : ''}
+              <p class="card-description">${description}</p>
+              <p class="card-author">- <span>${author}</span></p>
+            </div>
+          `;
+          appContainer.appendChild(listItem);
+        });
+      } else {
+        listItem.innerHTML = `
+          <div class="card-content">
+            <h3 class="card-title">${titleToShow}</h3>
+            ${criteria ? `<h3 class="card-title">${criteria}</h3>` : ''}
+            <p class="card-description">${description}</p>
+            <p class="card-author">- <span>${author}</span></p>
           </div>
-          ${criteria ? `<h3 class="card-title">${criteria}</h3>` : ''}
-          <p class="card-description">${description}</p>
-          <p class="card-author">- <span>${author}</span></p>
-        </div>
-      `;
-
-      appContainer.appendChild(listItem);
+        `;
+        appContainer.appendChild(listItem);
+      }
     });
   }
 
