@@ -3,6 +3,7 @@
 <head>
   <title>Flyers Recognition Feed</title>
   <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body class="w-100 h-100 sans-serif">
   <div class="pageTitle shadow-1 w-100 pa3 v-mid z-1">
@@ -102,54 +103,4 @@
   // Refresh the page every 3 minutes (180,000 milliseconds)
   setTimeout(refreshPage, 180000);
 </script>
-<style>
-  .pageTitle {
-    background-color: #80CC00;
-    color: white;
-    padding-left: 3rem;
-  }
-  main {
-    background-color: #1C355E;
-  }
-  /* Additional style for the inline-block cards */
-  .card {
-    display: inline-block;
-    margin: 1em 0.7%;
-    vertical-align: top;
-    box-sizing: border-box;
-    width: 18.5%;
-    text-align: left;
-  }
-  .card-content {
-    background-color: white;
-    border: 1px solid #ddd;
-    padding: 1em;
-    border-radius: 1em;
-  }
-  .card-title {
-    font-size: 18px;
-    margin: 0 0 10px;
-    padding: 0;
-    line-height: 1.2;
-  }
-  .card-image-container {
-    text-align: center;
-  }
-  .card-image {
-    max-width: 100%;
-    height: auto;
-  }
-  .card-description {
-    font-size: 14px;
-    margin: 10px 0;
-  }
-  .card-author {
-    font-size: 12px;
-    color: #666;
-  }
-  #app {
-    text-align: center;
-    padding: 1em 1.5%;
-  }
-</style>
 </html>
