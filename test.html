@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Flyers Recognition Feed</title>
+  <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="w-100 h-100 sans-serif">
+  <div class="pageTitle shadow-1 w-100 pa3 v-mid z-1">
+    <h1>Our Recognitions</h1>
+  </div>
+  <main class="z-0 relative">
+    <div id="app" class="overflow-hidden">
+    </div>
+  </main>
+</body>
+<script>
+  // Original Flyers feed
+  const feedUrl = 'https://blackhawk.achievers.com/api/v1/program/news_feed/get?module=26786&access_key_id=kdwo4YlwygXWvCTTsVKTJwyemzPwUPRB&secret_access_key=nQolwLoSCO4twRJ9oPOLQNmh57o8hI0T';
+
+  function fetchRSSFeed(url) {
+    return fetch(url)
+      .then(response => response.text())
+      .then(data => (new window.DOMParser()).parseFromString(data, 'text/xml'))
+      .catch(error => console.error('Error fetching RSS feed:', error));
+  }
+
+  function getCDATAContent(element) {
+    if (element && element.firstChild) {
+      if (element.firstChild.nodeType === Node.CDATA_SECTION_NODE) {
+        return element.firstChild.textContent;
+      } else {
+        return element.textContent;
+      }
+    }
+    return '';
+  }
+
+  function splitTitle(title) {
+    const regex = /\[(.*?)\] - Recognized for \[(.*?)\]/;
+    const match = title.match(regex);
+    if (match && match.length === 3) {
+      return {
+        recipient: match[1],
+        criteria: match[2],
+        singleTitleString: null,
+      };
+    } else {
+      return {
+        recipient: null,
+        criteria: null,
+        singleTitleString: title,
+      };
+    }
+  }
+
+  function loadGif(url) {
+    return fetch(url)
+      .then(response => response.blob())
+      .then(blob => URL.createObjectURL(blob))
+      .catch(error => console.error('Error:', error));
+  }
+
+  function displayFeedItems(xml) {
+    const items = xml.querySelectorAll('item');
+    const appContainer = document.getElementById('app');
+
+    items.forEach(item => {
+      const title = getCDATAContent(item.querySelector('title'));
+      const link = item.querySelector('link').textContent;
+      const description = getCDATAContent(item.querySelector('description'));
+      const author = getCDATAContent(item.querySelector('author'));
+      const enclosure = item.querySelector('enclosure');
+      const imageURL = enclosure ? enclosure.getAttribute('url') : '';
+
+      const { recipient, criteria, singleTitleString } = splitTitle(title);
+
+      let titleToShow = recipient ? recipient : singleTitleString;
+
+      const listItem = document.createElement('div');
+      listItem.classList.add("card");
+      listItem.style.display = "inline-block";
+
+      if (imageURL) {
+        loadGif(imageURL).then(blobURL => {
+          listItem.innerHTML = `
+            <div class="card-content">
+              <h3 class="card-title">${titleToShow}</h3>
+              <div class="card-image-container">
+                <img class="card-image" src="${blobURL}" alt="Image"/>
+              </div>
+              ${criteria ? `<h3 class="card-title">${criteria}</h3>` : ''}
+              <p class="card-description">${description}</p>
+              <p class="card-author">- <span>${author}</span></p>
+            </div>
+          `;
+          appContainer.appendChild(listItem);
+        });
+      } else {
+        listItem.innerHTML = `
+          <div class="card-content">
+            <h3 class="card-title">${titleToShow}</h3>
+            ${criteria ? `<h3 class="card-title">${criteria}</h3>` : ''}
+            <p class="card-description">${description}</p>
+            <p class="card-author">- <span>${author}</span></p>
+          </div>
+        `;
+        appContainer.appendChild(listItem);
+      }
+    });
+  }
+
+  function refreshPage() {
+    window.location.reload();
+  }
+
+  fetchRSSFeed(feedUrl).then(xml => displayFeedItems(xml));
+
+  // Refresh the page every 3 minutes (180,000 milliseconds)
+  setTimeout(refreshPage, 180000);
+</script>
+</html>
